@@ -50,12 +50,10 @@ TEST_CASE("operator (=)")
     Fraction c_new = Fraction(c);
     CHECK(c.get_nom() == c_new.get_nom());
     CHECK(c.get_den() == c_new.get_den());
-    CHECK(c.get_gcd() == c_new.get_gcd());
     CHECK(&c != &c_new);
     Fraction a = 2.5;
     CHECK(a.get_nom() == 5);
-    CHECK(a.get_den() == 2);
-    CHECK(c.get_gcd() == 1);    
+    CHECK(a.get_den() == 2);   
 }
 
 TEST_CASE("operator (+)")
@@ -87,16 +85,7 @@ TEST_CASE("operator (*)")
     CHECK(f1*1 == -0.5); // checking multiplication with other int
     CHECK(3.0*f2 == 1.5); // checking multiplication with other double
     CHECK(3*f2 == 1.5); // checking multiplication with other integer    
-}
-
-//The / operator to divide 
-//two fractions and return their quotient as another fraction in reduced form.
-    
-    // Fraction operator/(const Fraction& other) const;
-    // Fraction operator/(const double other) const;
-    // // friend Fraction operator/(const Fraction& c1, const Fraction& c2);
-    // // friend Fraction operator/(const Fraction& c1, const double c2);
-    // friend Fraction operator/(double c1, const Fraction& c2);       
+}  
 
 TEST_CASE("operator (/)")
 {    
@@ -108,4 +97,76 @@ TEST_CASE("operator (/)")
     CHECK(3.0/f2 == 1.5); // checking division  of double with Fraction 
     CHECK(3/f2 == 1.5); // checking division of int with Fraction
     CHECK_THROWS(f1/0); // checking throws for division fraction with zero        
+}
+
+TEST_CASE("operator (==)")
+{
+    Fraction f1 = Fraction(1,2);
+    Fraction f2 = Fraction(4,2);
+    CHECK((f1==f2) == 1);
+
+    double x = 1.000001;
+    Fraction f3 = Fraction(5,5);
+    CHECK((f3==x) == 1);
+    CHECK((x==f3) == 1);
+}
+
+TEST_CASE("operator (!=)")
+{
+    Fraction f1 = Fraction(1,2);
+    Fraction f2 = Fraction(4,2);
+    CHECK((f1!=f2) == 0);
+
+    double x = 1.000001;
+    Fraction f3 = Fraction(5,5);
+    CHECK((f3!=x) == 0);
+    CHECK((x!=f3) == 0);
+}
+
+
+// // prefix: ++n:
+//     Fraction& operator++();
+
+// // postfix: n++:
+//     const Fraction operator++(int);
+
+// // // prefix: --n:
+//     Fraction& operator--();
+
+// // postfix: n--:
+//     const Fraction operator--(int);
+TEST_CASE("operator (prefix: ++n)")
+{
+    Fraction f1 = Fraction(1,2);
+    Fraction f2 = Fraction(2,4);
+    Fraction f3 = (++f2) + f1;
+    CHECK(f3 == 2);
+    CHECK(f2 == 1.5);
+}
+
+TEST_CASE("operator (postfix: n++)")
+{
+    Fraction f1 = Fraction(1,2);
+    Fraction f2 = Fraction(2,4);
+    Fraction f3 = (f2++) + f1;
+    CHECK(f3 == 1);
+    CHECK(f2 == 1.5);
+}
+
+TEST_CASE("operator (prefix: --n)")
+{
+    Fraction f1 = Fraction(1,2);
+    Fraction f2 = Fraction(2,4);
+    Fraction f3 = (--f2) + f1;
+    CHECK(f3 == 0);
+    CHECK(f2 == -0.5);
+}
+
+TEST_CASE("operator (postfix: n--)")
+{
+    Fraction f1 = Fraction(1,2);
+    Fraction f2 = Fraction(2,4);
+    Fraction f3 = (f2--) + f1;
+    CHECK(f3 == 1);
+    CHECK(f2 == -0.5);
 }

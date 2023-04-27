@@ -12,26 +12,17 @@ using namespace ariel;
 // reciving to doubles:
     Fraction::Fraction(double nom_other,double den_other) 
     {
-        cout << "enter Fraction(double, double)" << endl;
         if(den_other == 0)
         {
-            cout << "enter if(den_other == 0)" << endl;
             throw std::invalid_argument("illeagal value, denominator can not be qeual to zero");
         }
         else if (nom_other == 0)
         {   
-            cout << "enter if (nom_other == 0) nom_other = "<< endl;
             nom_other = 0;
             den_other = 1;
         }
         else
         {
-        cout << "enter to else " <<endl;
-
-        nom_other = round(nom_other*1000);
-        nom_other = nom_other/1000;
-        den_other = round(den_other*1000);
-        den_other = den_other/1000;
         int gcd_val = __gcd(int(nom_other), int(den_other));
         nom = nom_other/gcd_val;
         den = den_other/gcd_val;   
@@ -46,13 +37,35 @@ using namespace ariel;
         {
             return;
         }
-        Fraction(other.nom, other.den);     
+        nom = other.nom;
+        den = other.den;      
+    };
+// Move constructor (for tidy):
+    Fraction::Fraction(Fraction&& other)noexcept
+    {
+        if (this == &other)
+        {
+            return;
+        }
+        nom = other.nom;
+        den = other.den;        
+    };
+// Move assignment operator (for tidy):
+    Fraction& Fraction::operator=(Fraction&& other)noexcept
+    {
+        if (this == &other)
+        {
+            return (*this);
+        }
+        nom = other.nom;
+        den = other.den;
+        return (*this);
     };
 
-// recive one double
+
+//  assuming that double does not have more than 3 digits after decimal point 
     Fraction::Fraction(double other)
     {
-        cout << " enter to Fraction::Fraction(double other)" << endl;
         if (other == 0)
         {
             nom = 0;
@@ -60,23 +73,14 @@ using namespace ariel;
         }
         else
         {
-        double int_val = other - round(other); 
-        double frac = get_3_dig(int_val);
-        int deno = 1000;
-        frac = frac*1000;
-        int gcd = __gcd(int(frac), deno);
-        int nomo = frac/gcd;
-        den = deno/gcd;
-        nom = (den*int_val) + nomo; 
+        int presicion = 1000;
+        int numerator = other*presicion;
+        int denomerator = 1*presicion;
+        int gcd = __gcd(numerator, denomerator);
+        nom = numerator/gcd;
+        den = denomerator/gcd;
         }
                   
-    };
-    double Fraction::get_3_dig(const double d)
-    {
-        double ans = floor(d*1000);
-        ans = ans/1000;
-        return ans;
-
     };
 
 // Destructor:
@@ -91,19 +95,12 @@ using namespace ariel;
     {
         return den;
     };
-    // int Fraction::get_gcd()
-    // {
-    //     return gcd;
-    // };
-    
 
 // Convert Fraction to double:
     Fraction::operator double() const
     {   
-        double val = double(nom) / double(den); 
-        val = round(val*1000);
-        val = val/1000;
-        return val;
+        double convert = double(nom)/double(den);
+        return convert;
     };
 
 // operator =:
@@ -113,47 +110,43 @@ using namespace ariel;
         {
             return *this;
         }
-        delete[] this;        
-        return (*this = Fraction(other));         
+        (*this).nom = other.nom;
+        (*this).den = other.den;        
+        return (*this);         
     };
 
-    Fraction& Fraction::operator=(const double other)
+    Fraction& Fraction::operator=(double other)
     {
         if (*this == other)
         {
             return *this;
         }
-        delete[] this;  
-        return (*this = Fraction(other));    
+        //delete[] this;
+        Fraction o = Fraction(other);
+
+        return (*this = o);    
     };    
 
 // operator (+):
 
     Fraction Fraction::operator+(const Fraction& other) const
-    {
-        cout << "enter to operator+(const Fraction& other) " << endl;
-        // double sum = double(*this) + double(other);
-        // return Fraction(sum);
-        Fraction _other = Fraction(other);
-        int d = _other.get_den() * den;
-        // int x = nom * other.den;
-        // int y = other.nom * den;
-        int sum = (nom * _other.get_den()) + (_other.get_nom() * den); 
-        int gcd = __gcd(sum,d);
-        return Fraction((sum/gcd), (d/gcd));
-
+    {  
+        int denominator = den * other.den;
+        int numerator = nom*(other.den) + (other.nom) * den;
+        return Fraction(numerator, denominator);
     };
 
-    Fraction Fraction::operator+(const double other) const
+    Fraction Fraction::operator+(double other) const
     {
-        double sum = double(*this) + other;
-        return Fraction(sum);
+        // double sum = double(*this) + other;
+        //return Fraction(sum);
+        return (*this)+(Fraction(other));
     };
-    Fraction Fraction::operator+(const int other) const // Check if this method is neccesery 
-    {                                                   // i did this method beacuse the
-                                                        // operator ++(int) creats error
-        double sum = double(*this) + other;
-        return Fraction(sum);
+    Fraction Fraction::operator+(int other) const // Check if this method is neccesery 
+    {                                                 // i did this method beacuse the
+          // operator ++(int) creats error
+        //Fraction o = Fraction(other);
+        return (*this)+Fraction(other);
         
     };
     
@@ -163,82 +156,61 @@ using namespace ariel;
     
     Fraction Fraction::operator-(const Fraction& other) const
     {
-        double subtract = double(*this) - double(other);
-        return Fraction(subtract);
+        int denominator = den * other.den;
+        int numerator = nom*(other.den) - (other.nom) * den;
+        return Fraction(numerator, denominator);
     };
-    Fraction Fraction::operator-(const double other) const
+    Fraction Fraction::operator-(double other) const
     {
-         double subtract = double(*this) - other;
-         return Fraction(subtract);
+        return (*this)-(Fraction(other));
     };
-    Fraction Fraction::operator-(const int other) const
+    Fraction Fraction::operator-(int other) const
     {
-        double subtract = double(*this) - other;
-        return Fraction(subtract);
+        return (*this)-(Fraction(other));
     };
-    // Fraction operator-(double c1, const Fraction& c2)
-    // {
-    //     double subtract = c1 - double(c2);
-    //     return Fraction(subtract);
-    // };
-    // Fraction operator-(int c1, const Fraction& c2)
-    // {   
-    //     double subtract = c1 - double(c2);
-    //     return Fraction(subtract);
-    //     //return double(c1) - c2; // gives error, why?
-    // };
 
 //The * operator to multiply 
 //two fractions and return their product as another fraction in reduced form.
     
     Fraction Fraction::operator*(const Fraction& other) const
     {
-        double mul = double(*this) * double(other);
-        return Fraction(mul);
+        int denominator = den * other.den;
+        int numerator = nom*(other.nom);
+        return Fraction(numerator, denominator);
     };
 
-    Fraction Fraction::operator*(const double other) const
-    {
-        double mul = double(*this) * other;
-        return Fraction(mul);
-    };
-    Fraction Fraction::operator*(const int other) const
-    {
-        return (*this)*double(other);
+    Fraction Fraction::operator*(double other) const
+    {   
+        return (*this)*Fraction(other);
     };
 
-    // Fraction operator*(double c1, const Fraction& c2)
-    // {
-    //     return c2*c1;
-    // };
-    // Fraction operator*(int c1, const Fraction& c2)
-    // {
-    //     return c2*c1;
-    // };  
+    Fraction Fraction::operator*(int other) const
+    {
+        return (*this)*(Fraction(other));
+    };
    
 //The / operator to divide 
 //two fractions and return their quotient as another fraction in reduced form.
     
     Fraction Fraction::operator/(const Fraction& other) const
     {   
-        // if (other == 0)
-        // {
-        //     throw std::invalid_argument("can not divide in zero");
-        // }
-        
-        double quotient = double(*this)/double(other);
-        return Fraction(quotient);
+         if (other.nom == 0)
+         {
+             throw std::invalid_argument("can not divide in zero");
+         }
+        Fraction inverse = Fraction(other.den, other.nom);
+        return (*this)*inverse; 
     };
-    Fraction Fraction::operator/(const double other) const
+    Fraction Fraction::operator/(double other) const
     {
         if (other == 0)
         {
             throw std::invalid_argument("can not divide in zero");
         }
-        double quotient = double(*this)/double(other);
-        return Fraction(quotient);
+        Fraction o = Fraction(other);
+        return (*this)/o;
     };
-    Fraction Fraction::operator/(const int other) const
+    Fraction Fraction::operator/(int other) const
     {
         return (*this)/double(other);
     };                         
@@ -252,25 +224,13 @@ using namespace ariel;
         double other_frac = double(other); 
         return (this_frac == other_frac);
     };
-    bool Fraction::operator==(const double other) const
+    bool Fraction::operator==(double other) const
     {   
+        float TOLERANCE = 0.001;
         double frac = double(*this);
         bool ans = ((abs(frac - other) <= TOLERANCE) && (abs(frac - other) >= TOLERANCE));
         return ans;
     };
-
-//     bool operator==(const Fraction& c1, const Fraction& c2)
-//     {
-//         return (c1.operator==(c2));
-//     };
-
-
-// // friend bool operator==(const Fraction& c1, const Fraction& c2);
-// // friend bool operator==(const Fraction& c1, double other);
-//     bool operator==(double other, const Fraction& c2)
-//     {
-//         return (c2==other);
-//     };
 
 // != operator
     bool Fraction::operator!=(const Fraction& other) const
@@ -279,21 +239,18 @@ using namespace ariel;
     };
     bool Fraction::operator!=(double other) const
     {
-        return double(*this) != other; 
-    };
-    // bool operator!=(double flt, const Fraction& frac)
-    // {
-    //     return flt != double(frac);
-    // };     
+        return !((*this) == other); 
+    };   
 
     // > :
     bool Fraction::operator>(const Fraction& other) const
     {
         return (double(*this) > double(other));
     };
-    bool Fraction::operator>(const double other) const
-    {
-        return (double(*this) > other);
+    bool Fraction::operator>(double other) const
+    { 
+        double f = double(*this); 
+        return (f > other);
     };
     // friend bool operator>(const Fraction& c1, const Fraction& c2);
     // friend bool operator>(const Fraction& c1, double other);
@@ -343,12 +300,6 @@ using namespace ariel;
     {
          return (double(*this) <= other);
     };
-    // friend bool operator<=(const Fraction& c1, const Fraction& c2);
-    // friend bool operator<=(const Fraction& c1, double other);
-    // bool operator<=(double other, const Fraction& c2)
-    // {
-    //     return (other <= double(c2));
-    // };
 
 //The ++ and -- operator
 //that adds (or substracts) 1 to the fraction. implement both pre and post fix.
@@ -356,35 +307,31 @@ using namespace ariel;
 // prefix: ++n:
     Fraction& Fraction::operator++()
     {
-        double me = double(*this);
-        me++;
-        *this = Fraction(me);
-        return *this;
+        (*this) = (*this) + 1;
+        return (*this);
     };
 
 // postfix: n++:
-    const Fraction Fraction::operator++(int harta)
-    {
-        Fraction other_frac = Fraction(*this);
-        other_frac = other_frac + 1;
-        return other_frac;
+    const Fraction Fraction::operator++(int)
+    {   
+        Fraction copy = (*this);
+        (*this) = (*this) + 1;
+        return copy;
     };
 
 // // prefix: --n:
     Fraction& Fraction::operator--()
-    {
-        double me = double(*this);
-        me--;
-        *this = Fraction(me);
-        return *this;
+    {   
+        (*this) = (*this) - 1;
+        return (*this);
     };
 
 // postfix: n--:
-    const Fraction Fraction::operator--(int harta)
-    {
-        Fraction other_frac = Fraction(*this);
-        other_frac = other_frac - 1;
-        return other_frac;
+    const Fraction Fraction::operator--(int)
+    {   cout << "enter operator--(int) " << endl;
+        Fraction copy = (*this);
+         (*this) = (*this) - 1;
+        return copy;
     };
 
 // to string

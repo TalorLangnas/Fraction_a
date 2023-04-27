@@ -3,7 +3,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
-#include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <cmath>
@@ -14,9 +13,7 @@ namespace ariel{
 class Fraction
 {
     int nom;
-    int den;
-    //int gcd;
-  
+    int den;  
 
     public:
 // Constructors:
@@ -27,6 +24,8 @@ class Fraction
     Fraction(double,double);
 // copy:
     Fraction(const Fraction&);
+// Move constructor (for tidy):
+    Fraction(Fraction&&) noexcept;     
 // recive one double
     Fraction(double);
 // Destructor:
@@ -35,64 +34,66 @@ class Fraction
 // Getters:
     int get_nom();
     int get_den();
-    //int get_gcd();
-
 
 //All operators should work on both sides on fractions and doubles type variables.
 //on a double var you need use up to 3 digits beyond the desimal point for acuracy.
 
 // operator =:
     Fraction& operator=(const Fraction&);
-    Fraction& operator=(const double);
-
+    Fraction& operator=(double);
+// Move assignment operator (for tidy):
+    Fraction& operator=(Fraction&& other)noexcept;
 
 //The + operator to add two fractions and return their sum as another fraction in reduced form.
     
     Fraction operator+(const Fraction& other) const;
-    Fraction operator+(const double other) const;
-    Fraction operator+(const int other) const;
-    friend Fraction operator+(double c1, const Fraction& c2)
+    Fraction operator+(double other) const;
+    Fraction operator+(int other) const;
+    friend Fraction operator+(double val1, const Fraction& fraction2)
     {
-        return c2+(c1);
+        return fraction2+(val1);
     };
-    friend Fraction operator+(int c1, const Fraction& c2)
+    friend Fraction operator+(int val1, const Fraction& fraction2)
     {
-        return c2+(double(c1));
+        return fraction2+(double(val1));
     };  
-    //friend Fraction operator+(const Fraction& c1, const Fraction& c2);
-    // friend Fraction operator+(const Fraction& c1, const double c2);
+    //friend Fraction operator+(const Fraction& val1, const Fraction& fraction2);
+    // friend Fraction operator+(const Fraction& val1, const double fraction2);
          
 
 //The - operator to subtract two fractions and return their 
 //difference as another fraction in reduced form.
     
     Fraction operator-(const Fraction& other) const;
-    Fraction operator-(const double other) const;
-    Fraction operator-(const int) const;
+    Fraction operator-(double other) const;
+    Fraction operator-(int) const;
 
-    friend Fraction operator-(double c1, const Fraction& c2)
+    friend Fraction operator-(double val1, const Fraction& fraction2)
     {
-        double subtract = c1 - double(c2);
+        double subtract = val1 - double(fraction2);
         return Fraction(subtract);
     };
-    friend Fraction operator-(int c1, const Fraction& c2)
+    friend Fraction operator-(int val1, const Fraction& fraction2)
     {
-        return double(c1) - c2;
+        return double(val1) - fraction2;
     };              
 
 //The * operator to multiply 
 //two fractions and return their product as another fraction in reduced form.
     
     Fraction operator*(const Fraction&) const;
-    Fraction operator*(const double) const;
-    Fraction operator*(const int) const;
-    friend Fraction operator*(double c1, const Fraction& c2)
-    {
-       return c2*c1;
+    Fraction operator*(double) const;
+    Fraction operator*(int) const;
+    friend Fraction operator*(double val1, const Fraction& fraction2)
+    {   
+       cout << " enter to friend operator* (double, Fraction)" << endl;
+       cout << "double val1 = " << val1 << endl;
+       cout << "Fraction& fraction2  = " << fraction2 << endl;
+       return fraction2*val1;
     };
-    friend Fraction operator*(int c1, const Fraction& c2)
+    friend Fraction operator*(int val1, const Fraction& fraction2)
     {
-         return c2*c1;
+         return fraction2*val1;
     };        
 
 
@@ -100,44 +101,34 @@ class Fraction
 //two fractions and return their quotient as another fraction in reduced form.
     
     Fraction operator/(const Fraction& other) const;
-    Fraction operator/(const double other) const;
-    Fraction operator/(const int other) const;
-    friend Fraction operator/(double other, const Fraction& c2)
+    Fraction operator/(double other) const;
+    Fraction operator/(int other) const;
+    friend Fraction operator/(double other, const Fraction& fraction2)
     {
-        double quotient = other/double(c2);
-        return Fraction(quotient);
+        return Fraction(other)/fraction2;
     }; 
-    friend Fraction operator/(int other, const Fraction& c2)
+    friend Fraction operator/(int other, const Fraction& fraction2)
     {
-        return double(other)/c2;
+        return Fraction(other)/fraction2;
     };       
 
 
 //The == operator to compare two fractions for equality and return true or false.
 
     bool operator==(const Fraction& other) const;
-    bool operator==(const double other) const;
-    const float TOLERANCE = 0.001;
-    // friend bool operator==(const Fraction& c1, const Fraction& c2)
-    // {
-    //     double d1 = double(c1);
-    //     double d2 = double(c2);
-    //     return d1 == d2;
-    // };
-    friend bool operator==(double other, const Fraction& c2)
+    bool operator==(double other) const;
+    friend bool operator==(double other, const Fraction& fraction2)
     {
-        // Fraction other_frac = Fraction(other);
-        // return other_frac == c2;
-        return other==c2;
+        return fraction2==other;
     };
 
 // != operator
     bool operator!=(const Fraction&) const;
     bool operator!=(double) const;
-    friend bool operator!=(double d, const Fraction& f)
+    friend bool operator!=(double value, const Fraction& fraction)
     {
-        Fraction d_fraction = Fraction(d);
-        return d_fraction == f;
+        Fraction d_fraction = Fraction(value);
+        return d_fraction == fraction;
     }; 
 
 
@@ -145,43 +136,41 @@ class Fraction
 
 // > :
     bool operator>(const Fraction& other) const;
-    bool operator>(const double other) const;
-    // friend bool operator>(const Fraction& c1, const Fraction& c2);
-    // friend bool operator>(const Fraction& c1, double other);
-    friend bool operator>(double other, const Fraction& c2)
+    bool operator>(double other) const;
+    friend bool operator>(double other, const Fraction& fraction2)
     {
-         return (other > double(c2));
+         return (other > double(fraction2));
     };
 
 // < :
     bool operator<(const Fraction& other) const;
     bool operator<(double other) const;
-    // friend bool operator<(const Fraction& c1, const Fraction& c2);
-    // friend bool operator<(const Fraction& c1, double other);
-    friend bool operator<(double other, const Fraction& c2)
+    // friend bool operator<(const Fraction& val1, const Fraction& fraction2);
+    // friend bool operator<(const Fraction& val1, double other);
+    friend bool operator<(double other, const Fraction& fraction2)
     {
-        return (other < double(c2));
+        return (other < double(fraction2));
     };
 
 // >= :
     bool operator>=(const Fraction& other) const;
     bool operator>=(double other) const;
-    // friend bool operator>=(const Fraction& c1, const Fraction& c2);
-    // friend bool operator>=(const Fraction& c1, double other);
-    friend bool operator>=(double other, const Fraction& c2)
+    // friend bool operator>=(const Fraction& val1, const Fraction& fraction2);
+    // friend bool operator>=(const Fraction& val1, double other);
+    friend bool operator>=(double other, const Fraction& fraction2)
     {
-        return (other >= double(c2));
+        return (other >= double(fraction2));
     };
    
 
 // <= :
     bool operator<=(const Fraction& other) const;
     bool operator<=(double other) const;
-    // friend bool operator<=(const Fraction& c1, const Fraction& c2);
-    // friend bool operator<=(const Fraction& c1, double other);
-    friend bool operator<=(double other, const Fraction& c2)
+    // friend bool operator<=(const Fraction& val1, const Fraction& fraction2);
+    // friend bool operator<=(const Fraction& val1, double other);
+    friend bool operator<=(double other, const Fraction& fraction2)
     {
-        return (other <= double(c2));
+        return (other <= double(fraction2));
     };
 
 
@@ -214,17 +203,17 @@ class Fraction
 //The >> operator to read a fraction from an input stream by taking two integers as input.
     friend std::istream& operator>> (std::istream& input , Fraction& fraction)
     {
-        int x;
-        int y;
+        int numerator = 1;
+        int denumerator = 1;
         string div_line = "/";
-        input >> x >> div_line >> y; 
+        input >> numerator >> div_line >> denumerator; 
         if (input.good()) 
         {
             if (div_line != "/")
             {
                 throw std::invalid_argument("illeagal value");
             }
-            fraction = Fraction(x, y);            
+            fraction = Fraction(numerator, denumerator);            
         }
         
         return input;
@@ -237,11 +226,8 @@ class Fraction
 // to string 
     operator string() const;
     string to_string() const;
-    //string nom_to_string() const;
-    //string den_to_string() const;
 
-//  input - double, output - double with 3 digits after the decimal point:
-    double get_3_dig(const double);
+
 
 };
 }
